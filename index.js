@@ -1,7 +1,5 @@
 const puppeteer = require('puppeteer');
-
-const userName = 'my.creative.lens';
-const password = 'Unsafe@88';
+const secrets = require('./secrets');
 
 (async () => {
     const browser = await puppeteer.launch({ headless: false });
@@ -12,8 +10,20 @@ const password = 'Unsafe@88';
 
     const inputs = await page.$$('input');
 
-    await inputs[0].type(userName);
-    await inputs[1].type(password);
+    await inputs[0].type(secrets.USERNAME);
+    await inputs[1].type(secrets.PASSWORD);
 
-    // await browser.close();
+    const loginButton = (await page.$$('button'))[1];
+    await loginButton.click();
+
+    await page.waitForNavigation();
+    await page.goto(`https://instagram.com/${secrets.USERNAME}`);
+    await page.waitForSelector('article a');
+
+    await (await page.$('article a')).click();
+    await page.waitForTimeout(1000);
+    const likeButton = (await page.$('.ltpMr span'));
+    await likeButton.click();
+
+    await browser.close();
 })();
